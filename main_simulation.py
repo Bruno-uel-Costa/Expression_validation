@@ -109,17 +109,18 @@ crb_tau_theory, crb_nu_theory = analytical_crb.calculate_analytical_crb(config)
 MSE_tau = []
 MSE_nu = []
 
+UPSAMPLING_FACTOR = 10
 
 # --- Define Search Grid for ML Estimator ---
-# Search grid covers the full range of discrete delays/Dopplers.
-# search_tau_indices are 0 to M-1, search_nu_indices are 0 to N-1.
-search_tau_indices = np.arange(config.M)
-search_nu_indices = np.arange(config.N)
+# Search grid covers the full range of discrete delays/Dopplers, upsampled for finer search.
+# search_tau_indices = np.arange(config.M) # Old version
+# search_nu_indices = np.arange(config.N)  # Old version
 
 # Convert indices to physical values, centered around 0.
-# This means index 0 maps to -M/2 * delta_tau, index M/2 maps to 0 * delta_tau etc.
-search_grid_tau = (search_tau_indices - config.M/2) * config.delta_tau
-search_grid_nu = (search_nu_indices - config.N/2) * config.delta_nu
+# The new grid is M*UPSAMPLING_FACTOR points long, effectively dividing delta_tau by UPSAMPLING_FACTOR.
+# The range of search remains similar: from approx -M/2*delta_tau to +M/2*delta_tau.
+search_grid_tau = (np.arange(config.M * UPSAMPLING_FACTOR) / UPSAMPLING_FACTOR - config.M/2) * config.delta_tau
+search_grid_nu  = (np.arange(config.N * UPSAMPLING_FACTOR) / UPSAMPLING_FACTOR - config.N/2) * config.delta_nu
 
 
 # --- Monte Carlo Simulation Loop ---
